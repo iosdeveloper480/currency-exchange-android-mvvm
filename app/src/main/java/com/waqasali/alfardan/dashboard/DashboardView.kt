@@ -4,28 +4,31 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -36,12 +39,15 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.waqasali.alfardan.ui.theme.AlFardanTheme
 import com.waqasali.alfardan.ui.widgets.BasicTextField
 import com.waqasali.alfardan.country.BottomSheet
+import com.waqasali.alfardan.login.setUserLoginConstraints
+import com.waqasali.alfardan.login.setUserLoginConstraints2
 
 class DashboardView: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,8 +74,8 @@ class DashboardView: ComponentActivity() {
                             InitDashboard(context = applicationContext,
                                 sendingAmountTextField = sendingAmountTextField,
                                 receivingAmountTextField = receivingAmountTextField, onNavigateToSelect = {
-                                showSheet = true
-                            })
+                                    showSheet = true
+                                })
                         }
                     }
                 }
@@ -87,8 +93,9 @@ fun InitDashboard(context: Context,
                   sendingAmountTextField: TextFieldState = remember { TextFieldState() },
                   receivingAmountTextField: TextFieldState = remember { TextFieldState() },
                   onNavigateToSelect: () -> Unit) {
-//    var sendingAmountTextField  by remember { mutableStateOf("") }
-//    var receivingAmountTextField by remember { mutableStateOf("") }
+
+    val firstTextFieldText = remember { mutableStateOf("") }
+
 
     ConstraintLayout(
         constraintSet = setUserLoginConstraints2(),
@@ -104,69 +111,75 @@ fun InitDashboard(context: Context,
                 .padding(10.dp),
         ) {
 
-            val focusManager = LocalFocusManager.current
+            val viewModel: DashboardViewModel = viewModel()
+            var isDropdownExpanded by remember { mutableStateOf(false) }
 
-            Text(modifier = Modifier.layoutId("TitleLabel"), text = "Currency Converter",
-                fontWeight = FontWeight.Bold,
-                fontSize = 25.sp,
-                color = Color.White)
-            Text(modifier = Modifier.layoutId("DescriptionLabel"),
-                text = "Use our convenient converter tool to see how much your money is worth in another currency.",
-                fontSize = 15.sp,
-                color = Color.White)
-            Text(modifier = Modifier.layoutId("SenderLabel"),
-                text = "AMOUNT YOU WILL SEND",
-                fontSize = 12.sp,
-                color = Color.White)
+            val currencyOptions = listOf("PKR", "IND", "SRI")
 
-            BasicTextField(
-                text = sendingAmountTextField.text, onValueChange = { sendingAmountTextField.text = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .layoutId("userEmail"), label = { Text("Sending Amount") },
-                placeHolderText = { Text("Enter Amount") }, imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Email, keyboardActions = KeyboardActions(onNext = {
-                    focusManager.moveFocus(FocusDirection.Down)
-                })
-            )
-            Text(modifier = Modifier.layoutId("AEDLabel"),
-                text = "AED",
-                fontSize = 15.sp,
-                color = Color.Black)
+            Column {
 
-            Text(modifier = Modifier.layoutId("ReceiverLabel"),
-                text = "RECEIVER WILL GET",
-                fontSize = 12.sp,
-                color = Color.White)
-            BasicTextField(text = receivingAmountTextField.text, onValueChange = { receivingAmountTextField.text = it },
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .layoutId("userPassword"),
-                label = { Text("Updating...") }, placeHolderText = { Text("Receiver Amount") },
-                imeAction = ImeAction.Next, keyboardType = KeyboardType.Password,
-                keyboardActions = KeyboardActions(onNext = {
-                    focusManager.moveFocus(FocusDirection.Down)
-                })
-            )
+                val focusManager = LocalFocusManager.current
 
-            OutlinedButton(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .wrapContentWidth()
-                    .layoutId("SelectButton"),
-                colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(Color.Transparent),
-                border = BorderStroke(0.dp, Color.Transparent),
-                shape = RoundedCornerShape(5.dp),
-                onClick = {
-                    onNavigateToSelect()
-                },
-                enabled = true,
-            ) {
-                Text(
-                    text = "Select",
-                    fontSize = 18.sp,
+                Text(modifier = Modifier.layoutId("TitleLabel"), text = "Currency Converter",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 25.sp,
+                    color = Color.White)
+                Text(modifier = Modifier.layoutId("DescriptionLabel"),
+                    text = "Use our convenient converter tool to see how much your money is worth in another currency.",
+                    fontSize = 15.sp,
+                    color = Color.White)
+                Text(modifier = Modifier.layoutId("SenderLabel"),
+                    text = "AMOUNT YOU WILL SEND",
+                    fontSize = 12.sp,
+                    color = Color.White)
+
+                BasicTextField(
+                    text = viewModel.inputValue,
+                    onValueChange = {
+                        viewModel.inputValue = it
+                    },
+                    label = { Text("Enter Amount") },
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    keyboardActions = KeyboardActions(onDone = { /* Handle done action if needed */ })
                 )
+
+                Box(
+                    modifier =  Modifier.fillMaxWidth().clickable {
+                        isDropdownExpanded = !isDropdownExpanded
+                    }
+                ) {
+                    BasicTextField(
+                        text = " ${viewModel.selectedCurrency} ${viewModel.convertedValue}" ,
+                        onValueChange = { viewModel.selectedCurrency = it },
+                        label = { Text("Select Currency") },
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done,
+                            keyboardType = KeyboardType.Text
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                isDropdownExpanded = !isDropdownExpanded
+                            }
+                        )   ,
+                        readOnly = true,
+                    )
+
+                    DropdownMenu(
+                        expanded = isDropdownExpanded,
+                        onDismissRequest = { isDropdownExpanded = false }
+                    ) {
+                        currencyOptions.forEach { currency ->
+                            DropdownMenuItem(onClick = {
+                                viewModel.selectedCurrency = currency
+                                isDropdownExpanded = false
+                            }) {
+                                Text(text = currency )
+                            }
+                        }
+                    }
+                }
+
+                Text("Converted Value: ${viewModel.convertedValue}")
             }
         }
     }

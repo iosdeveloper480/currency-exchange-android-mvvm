@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material3.Surface
@@ -34,7 +35,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -130,7 +130,7 @@ fun UserLoginScreen(context: Context, viewModel: LoginViewModel, onNavigateToReg
                 .layoutId("FieldsLayout")
                 .background(Color(0xFF32CC77), shape = RoundedCornerShape(5.dp))
                 .padding(10.dp),
-            ) {
+        ) {
 
             val focusManager = LocalFocusManager.current
 
@@ -141,7 +141,7 @@ fun UserLoginScreen(context: Context, viewModel: LoginViewModel, onNavigateToReg
                     .wrapContentHeight()
                     .layoutId("userEmail"), label = { Text("Email") },
                 placeHolderText = { Text("Enter Email") }, imeAction = ImeAction.Next,
-                keyboardType = KeyboardType.Email, keyboardActions = KeyboardActions(onNext = {
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email), keyboardActions = KeyboardActions(onNext = {
                     focusManager.moveFocus(FocusDirection.Down)
                 })
             )
