@@ -13,7 +13,7 @@
         android:theme="@style/Theme.AlFardan"
         tools:targetApi="31">
         <activity
-            android:name=".dashboard.DashboardView"
+            android:name=".intro.IntroView"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.AlFardan">
@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".login.LoginView"/>
-<!--        <activity android:name=".dashboard.DashboardView"/>-->
+        <activity android:name=".dashboard.DashboardView"/>
     </application>
 
 </manifest>
